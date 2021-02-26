@@ -25,7 +25,6 @@ const SignInForm: React.FC<{ onLogin: Function }> = ({ onLogin }) => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState()
-  const [data, setData] = useState()
   const code = window.location.search.split('=')?.[1]
 
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -55,7 +54,8 @@ const SignInForm: React.FC<{ onLogin: Function }> = ({ onLogin }) => {
           },
         },
       )
-      setData(resp.data)
+      console.log('Azure AD code:', code)
+      console.log('cognito JWT:', resp.data)
     } catch (error) {
       console.log(error)
     }
@@ -76,7 +76,6 @@ const SignInForm: React.FC<{ onLogin: Function }> = ({ onLogin }) => {
   return (
     <>
       {error && <Alert error={error} />}
-      {data && <div>{data}</div>}
 
       <h1 className="text-2xl border-b border-gray-200 pb-2">Welcome</h1>
 
