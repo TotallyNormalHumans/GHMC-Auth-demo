@@ -11,10 +11,14 @@
     "typescript": "^4.1.5"
   },
   "scripts": {
-    "start": "parcel ./src/index.html"
+    "start": "parcel ./src/index.html",
+    "build": "NODE_ENV=production parcel build src/index.html --out-dir=./build --no-source-maps"
   },
   "dependencies": {
+    "@types/qs": "^6.9.5",
     "aws-amplify": "^3.3.20",
+    "axios": "^0.21.1",
+    "qs": "^6.9.6",
     "react": "^17.0.1",
     "react-dom": "^17.0.1"
   }

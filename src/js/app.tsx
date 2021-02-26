@@ -2,6 +2,13 @@ import React, { useState, useEffect } from 'react'
 import { render, createPortal } from 'react-dom'
 import Amplify, { Auth } from 'aws-amplify'
 import awsconfig from '../aws-exports.js'
+import axios from 'axios'
+import qs from 'qs'
+
+const CLIENT_ID = '4vu67tk8tavg7iabebimtk1fm6'
+const ENDPOINT_URL = 'https://ghmcdemoapp.auth.us-west-2.amazoncognito.com'
+const IDENTITY_PROVIDER = 'AzureAD'
+const REDIRECT_URI = 'https://staging.drss2sc7l00jb.amplifyapp.com/'
 
 Amplify.configure(awsconfig)
 
@@ -18,6 +25,7 @@ const SignInForm: React.FC<{ onLogin: Function }> = ({ onLogin }) => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState()
+  const code = window.location.search.split('=')?.[1]
 
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -30,9 +38,41 @@ const SignInForm: React.FC<{ onLogin: Function }> = ({ onLogin }) => {
     }
   }
 
+  const verifyCode = async () => {
+    try {
+      const resp = await axios.post(
+        `${ENDPOINT_URL}/oauth2/token`,
+        qs.stringify({
+          client_id: CLIENT_ID,
+          grant_type: 'authorization_code',
+          redirect_uri: REDIRECT_URI,
+          code,
+        }),
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        },
+      )
+      console.log(resp)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const handleAzureSignIn = async () => {
+    window.location.assign(
+      `${ENDPOINT_URL}/oauth2/authorize?identity_provider=${IDENTITY_PROVIDER}&redirect_uri=${REDIRECT_URI}&response_type=code&client_id=${CLIENT_ID}&scope=aws.cognito.signin.user.admin+email+openid+phone+profile`,
+    )
+  }
+
   useEffect(() => {
     setError(undefined)
   }, [email, password])
+
+  console.log(code)
+
+  if (code) verifyCode()
 
   return (
     <>
@@ -72,14 +112,17 @@ const SignInForm: React.FC<{ onLogin: Function }> = ({ onLogin }) => {
               className="px-4 py-2 border border-blue-300 rounded-md shadow-sm text-sm font-medium text-gray-100 bg-blue-700 hover:bg-blue-600 w-full cursor-pointer"
             />
           </div>
-
-          <div className="mt-2">
-            <button className="px-4 py-2 border border-green-300 rounded-md shadow-sm text-sm font-medium text-gray-100 bg-green-700 hover:bg-green-600 w-full">
-              SSO
-            </button>
-          </div>
         </div>
       </form>
+
+      <div className="mt-2">
+        <button
+          onClick={handleAzureSignIn}
+          className="px-4 py-2 border border-green-300 rounded-md shadow-sm text-sm font-medium text-gray-100 bg-green-700 hover:bg-green-600 w-full"
+        >
+          SSO
+        </button>
+      </div>
     </>
   )
 }
